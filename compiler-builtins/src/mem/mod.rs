@@ -2,10 +2,16 @@
 #![allow(clippy::style)]
 
 #[allow(warnings)]
-#[cfg(target_pointer_width = "16")]
+#[cfg(any(
+    all(bootstrap, target_pointer_width = "16"),
+    all(not(bootstrap), target_address_width = "16"),
+))]
 type c_int = i16;
 #[allow(warnings)]
-#[cfg(not(target_pointer_width = "16"))]
+#[cfg(not(any(
+    all(bootstrap, target_pointer_width = "16"),
+    all(not(bootstrap), target_address_width = "16"),
+)))]
 type c_int = i32;
 
 // memcpy/memmove/memset have optimized implementations on some architectures

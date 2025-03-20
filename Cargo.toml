@@ -19,3 +19,11 @@ panic = 'abort'
 
 [profile.dev]
 panic = 'abort'
+
+[lints.rust.unexpected_cfgs]
+level = "warn"
+check-cfg = [
+  'cfg(bootstrap)',
+  # #[cfg(bootstrap)]
+  'cfg(target_address_width, values("16", "32", "64"))',
+]

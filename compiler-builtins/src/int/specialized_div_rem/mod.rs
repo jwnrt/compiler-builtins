@@ -143,7 +143,12 @@ fn u64_by_u64_div_rem(duo: u64, div: u64) -> (u64, u64) {
 #[cfg(all(
     any(
         target_family = "wasm",
-        not(any(target_pointer_width = "16", target_pointer_width = "32")),
+        not(any(
+            all(bootstrap, target_pointer_width = "16"),
+            all(bootstrap, target_pointer_width = "32"),
+            all(not(bootstrap), target_address_width = "16"),
+            all(not(bootstrap), target_address_width = "32"),
+        )),
     ),
     not(all(not(feature = "no-asm"), target_arch = "x86_64")),
     not(any(target_arch = "sparc", target_arch = "sparc64"))
@@ -164,7 +169,12 @@ impl_trifecta!(
 #[cfg(all(
     not(any(
         target_family = "wasm",
-        not(any(target_pointer_width = "16", target_pointer_width = "32")),
+        not(any(
+            all(bootstrap, target_pointer_width = "16"),
+            all(bootstrap, target_pointer_width = "32"),
+            all(not(bootstrap), target_address_width = "16"),
+            all(not(bootstrap), target_address_width = "32"),
+        )),
     )),
     not(all(not(feature = "no-asm"), target_arch = "x86_64")),
     not(any(target_arch = "sparc", target_arch = "sparc64"))
@@ -240,7 +250,10 @@ fn u32_by_u32_div_rem(duo: u32, div: u32) -> (u32, u32) {
 // than register size.
 #[cfg(all(
     not(all(not(feature = "no-asm"), target_arch = "x86")),
-    not(target_pointer_width = "64")
+    not(any(
+        all(bootstrap, target_pointer_width = "64"),
+        all(not(bootstrap), target_address_width = "64"),
+    ))
 ))]
 impl_delegate!(
     u64_div_rem,
@@ -257,7 +270,10 @@ impl_delegate!(
 // When not on x86 and the pointer width is 64, use `binary_long`.
 #[cfg(all(
     not(all(not(feature = "no-asm"), target_arch = "x86")),
-    target_pointer_width = "64"
+    any(
+        all(bootstrap, target_pointer_width = "64"),
+        all(not(bootstrap), target_address_width = "64"),
+    ),
 ))]
 impl_binary_long!(
     u64_div_rem,
