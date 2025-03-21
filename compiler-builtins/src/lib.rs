@@ -8,6 +8,7 @@
 #![feature(linkage)]
 #![feature(naked_functions)]
 #![feature(repr_simd)]
+#![feature(strict_provenance_lints)]
 #![cfg_attr(f16_enabled, feature(f16))]
 #![cfg_attr(f128_enabled, feature(f128))]
 #![no_builtins]
@@ -22,6 +23,8 @@
 #![allow(clippy::manual_swap)]
 // Support compiling on both stage0 and stage1 which may differ in supported stable features.
 #![allow(stable_features)]
+#![deny(fuzzy_provenance_casts)]
+#![deny(lossy_provenance_casts)]
 
 // We disable #[no_mangle] for tests so that we can verify the test results
 // against the native compiler-rt implementations of the builtins.
