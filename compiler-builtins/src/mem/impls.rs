@@ -73,11 +73,11 @@ pub unsafe fn copy_forward(mut dest: *mut u8, mut src: *const u8, mut n: usize) 
         let dest_end = dest.wrapping_add(n) as *mut usize;
 
         // Calculate the misalignment offset and shift needed to reassemble value.
-        let offset = src as usize & WORD_MASK;
+        let offset = src.addr() & WORD_MASK;
         let shift = offset * 8;
 
         // Realign src
-        let mut src_aligned = (src as usize & !WORD_MASK) as *mut usize;
+        let mut src_aligned = (src.addr() & !WORD_MASK) as *mut usize;
         // This will read (but won't use) bytes out of bound.
         // cfg needed because not all targets will have atomic loads that can be lowered
         // (e.g. BPF, MSP430), or provided by an external library (e.g. RV32I)
@@ -117,14 +117,14 @@ pub unsafe fn copy_forward(mut dest: *mut u8, mut src: *const u8, mut n: usize) 
     if n >= WORD_COPY_THRESHOLD {
         // Align dest
         // Because of n >= 2 * WORD_SIZE, dst_misalignment < n
-        let dest_misalignment = (dest as usize).wrapping_neg() & WORD_MASK;
+        let dest_misalignment = dest.addr().wrapping_neg() & WORD_MASK;
         copy_forward_bytes(dest, src, dest_misalignment);
         dest = dest.wrapping_add(dest_misalignment);
         src = src.wrapping_add(dest_misalignment);
         n -= dest_misalignment;
 
         let n_words = n & !WORD_MASK;
-        let src_misalignment = src as usize & WORD_MASK;
+        let src_misalignment = src.addr() & WORD_MASK;
         if likely(src_misalignment == 0) {
             copy_forward_aligned_words(dest, src, n_words);
         } else {
@@ -171,11 +171,11 @@ pub unsafe fn copy_backward(dest: *mut u8, src: *const u8, mut n: usize) {
         let dest_start = dest.wrapping_sub(n) as *mut usize;
 
         // Calculate the misalignment offset and shift needed to reassemble value.
-        let offset = src as usize & WORD_MASK;
+        let offset = src.addr() & WORD_MASK;
         let shift = offset * 8;
 
         // Realign src_aligned
-        let mut src_aligned = (src as usize & !WORD_MASK) as *mut usize;
+        let mut src_aligned = (src.addr() & !WORD_MASK) as *mut usize;
         // This will read (but won't use) bytes out of bound.
         // cfg needed because not all targets will have atomic loads that can be lowered
         // (e.g. BPF, MSP430), or provided by an external library (e.g. RV32I)
@@ -218,14 +218,14 @@ pub unsafe fn copy_backward(dest: *mut u8, src: *const u8, mut n: usize) {
     if n >= WORD_COPY_THRESHOLD {
         // Align dest
         // Because of n >= 2 * WORD_SIZE, dst_misalignment < n
-        let dest_misalignment = dest as usize & WORD_MASK;
+        let dest_misalignment = dest.addr() & WORD_MASK;
         copy_backward_bytes(dest, src, dest_misalignment);
         dest = dest.wrapping_sub(dest_misalignment);
         src = src.wrapping_sub(dest_misalignment);
         n -= dest_misalignment;
 
         let n_words = n & !WORD_MASK;
-        let src_misalignment = src as usize & WORD_MASK;
+        let src_misalignment = src.addr() & WORD_MASK;
         if likely(src_misalignment == 0) {
             copy_backward_aligned_words(dest, src, n_words);
         } else {
@@ -270,7 +270,7 @@ pub unsafe fn set_bytes(mut s: *mut u8, c: u8, mut n: usize) {
     if likely(n >= WORD_COPY_THRESHOLD) {
         // Align s
         // Because of n >= 2 * WORD_SIZE, dst_misalignment < n
-        let misalignment = (s as usize).wrapping_neg() & WORD_MASK;
+        let misalignment = s.addr().wrapping_neg() & WORD_MASK;
         set_bytes_bytes(s, c, misalignment);
         s = s.wrapping_add(misalignment);
         n -= misalignment;

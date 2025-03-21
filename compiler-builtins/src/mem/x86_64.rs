@@ -206,8 +206,8 @@ pub unsafe fn c_string_length(mut s: *const core::ffi::c_char) -> usize {
     // Shave of the least significand bits to align the address to a 16
     // byte boundary. The shaved of bits are used to correct the first iteration.
 
-    let align = s as usize & 15;
-    let mut s = ((s as usize) - align) as *const __m128i;
+    let align = s.addr() & 15;
+    let mut s = s.with_addr(s.addr() - align) as *const __m128i;
     let zero = _mm_set1_epi8(0);
 
     let x = {
@@ -261,7 +261,7 @@ pub unsafe fn c_string_length(mut s: *const core::ffi::c_char) -> usize {
     // either a zero byte is discovered or
     // pointer is aligned to an eight byte boundary.
 
-    while s as usize & 7 != 0 {
+    while s.addr() & 7 != 0 {
         if *s == 0 {
             return n;
         }
@@ -306,7 +306,7 @@ pub unsafe fn c_string_length(mut s: *const core::ffi::c_char) -> usize {
 /// Determine optimal parameters for a `rep` instruction.
 fn rep_param(dest: *mut u8, mut count: usize) -> (usize, usize, usize) {
     // Unaligned writes are still slow on modern processors, so align the destination address.
-    let pre_byte_count = ((8 - (dest as usize & 0b111)) & 0b111).min(count);
+    let pre_byte_count = ((8 - (dest.addr() & 0b111)) & 0b111).min(count);
     count -= pre_byte_count;
     let qword_count = count >> 3;
     let byte_count = count & 0b111;
