@@ -30,7 +30,7 @@ intrinsics! {
 
     #[mem_builtin]
     pub unsafe extern "C" fn memmove(dest: *mut u8, src: *const u8, n: usize) -> *mut u8 {
-        let delta = (dest as usize).wrapping_sub(src as usize);
+        let delta = dest.addr().wrapping_sub(src.addr());
         if delta >= n {
             // We can copy forwards because either dest is far enough ahead of src,
             // or src is ahead of dest (and delta overflowed).
